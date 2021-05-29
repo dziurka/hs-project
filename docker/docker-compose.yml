@@ -1,0 +1,103 @@
+version: '3'
+services:
+
+  #PHP Service
+  hs_app:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+      args:
+        XDEBUG: ${XDEBUG}
+        DOCKER_GATEWAY_HOST: ${DOCKER_GATEWAY_HOST}
+        XDEBUG_PORT: ${XDEBUG_PORT}
+    container_name: hs_app
+    restart: unless-stopped
+    tty: true
+    environment:
+      PHP_IDE_CONFIG: ${PHP_IDE_CONFIG}
+    working_dir: /home/hstest
+    volumes:
+      - ../:/home/hstest
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - hstest_network
+
+  #Nginx Service
+  hs_nginx:
+    image: nginx:alpine
+    container_name: hs_webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8000:80"
+      - "444:443"
+    volumes:
+      - ../:/home/hstest
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - hstest_network
+
+  #PostreSQL Service
+  hs_db:
+    image: postgres:13
+    container_name: hs_db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "54325:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: hs_dev
+      PGDATA: /var/lib/postgresql/data/hstest
+    volumes:
+      - hstest_psql_data:/var/lib/postgresql/data/
+      - ./postgres/postgres.conf:/etc/postgresql/postgresql.conf
+      - ./postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - hstest_network
+
+  hs_redis:
+    image: redis:alpine
+    container_name: hs_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass "redispasswd"
+    volumes:
+      - hstest_redis_data:/data
+    ports:
+      - "63795:6379"
+    networks:
+      - hstest_network
+
+  hs_adminer:
+    image: adminer:4.8.0
+    container_name: hs_adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: hs_db
+      ADMINER_PLUGINS: tables-filter tinymce
+    ports:
+      - 8080:8080
+    networks:
+      - hstest_network
+
+  hs_mailhog:
+    image: mailhog/mailhog
+    container_name: hs_mailhog
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
+    networks:
+      - hstest_network
+
+#Docker Networks
+networks:
+  hstest_network:
+    driver: bridge
+
+#Docker Volumes
+volumes:
+  hstest_psql_data:
+    driver: local
+  hstest_redis_data:
+    driver: local
