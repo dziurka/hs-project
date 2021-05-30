@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\App;
+namespace Tests\App\API;
 
 use Tests\TestCase;
 

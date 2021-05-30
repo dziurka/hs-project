@@ -8,6 +8,8 @@ The application has a basic authentication mechanism based on [Laravel Sanctum](
 
 The application architecture is domain-oriented.
 
+The application is NOT fully tested yet (there are some sample tests).
+
 ## Development
 ### Stack
 
