@@ -25,5 +25,7 @@ class ImportStartWarsPersonsCommand extends Command
             $amount,
             $deletePrevious === 'y'
         );
+
+        $this->info('Successfully imported');
     }
 }

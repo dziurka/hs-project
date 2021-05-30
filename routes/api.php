@@ -21,5 +21,9 @@ Route::group(['prefix' => 'v1'], function () {
         Route::prefix('user')->group(function () {
             Route::get('me', [\App\API\User\Controllers\UserController::class, 'show']);
         });
+
+        Route::prefix('sw')->group(function () {
+           Route::get('people', [\App\API\StarWars\Controllers\PersonController::class, 'index']);
+        });
     });
 });
