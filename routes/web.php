@@ -14,5 +14,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return response('HSTest API v. 1.0.0');
 });
+
+// Get CSRF Token by cookie
+Route::get('api/v1/csrf-cookie', [\App\API\Auth\Controllers\CsrfCookieController::class, 'show']);
